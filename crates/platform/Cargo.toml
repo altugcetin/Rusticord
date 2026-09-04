@@ -7,7 +7,14 @@ license.workspace = true
 repository.workspace = true
 publish.workspace = true
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "allow"
 
-[dependencies]
+[lints.clippy]
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"

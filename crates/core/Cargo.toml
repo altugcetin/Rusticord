@@ -1,5 +1,5 @@
 [package]
-name = "rusticord-voice"
+name = "rusticord-core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "rusticord-ui"
+name = "xtask"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,8 +9,3 @@ publish.workspace = true
 
 [lints]
 workspace = true
-
-[dependencies]
-gpui-kit.workspace = true
-rusticord-i18n = { path = "../i18n", version = "0.1.0" }
-rusticord-platform = { path = "../platform", version = "0.1.0" }

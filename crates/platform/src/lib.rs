@@ -1,14 +1,15 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub const APPLICATION_IDENTIFIER: &str = "ist.alchm.rusticord";
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::APPLICATION_IDENTIFIER;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn identifier_has_three_dns_labels() {
+        let mut labels = APPLICATION_IDENTIFIER.split('.');
+        assert_eq!(labels.next(), Some("ist"));
+        assert_eq!(labels.next(), Some("alchm"));
+        assert_eq!(labels.next(), Some("rusticord"));
+        assert_eq!(labels.next(), None);
     }
 }

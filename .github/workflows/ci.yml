@@ -1,0 +1,53 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+jobs:
+  gate:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            host: true
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            host: true
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            host: false
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            host: true
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            host: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+          targets: ${{ matrix.target }}
+          components: rustfmt, clippy, llvm-tools-preview
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: nextest,cargo-deny
+      - name: linux-libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libvulkan-dev libasound2-dev libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libxext-dev libxcb1-dev libxkbfile-dev pkg-config
+      - name: format
+        run: cargo fmt --all -- --check
+      - name: comments
+        run: cargo run -p xtask -- scan-comments
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --all-features --target ${{ matrix.target }} -- -D warnings
+      - name: test
+        if: matrix.host
+        run: cargo nextest run --workspace --target ${{ matrix.target }}
+      - name: deny
+        run: cargo deny check
