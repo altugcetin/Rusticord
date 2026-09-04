@@ -3,6 +3,7 @@ mod client;
 mod error;
 mod rate_limit;
 mod remote_auth;
+mod remote_auth_io;
 mod route;
 mod runtime;
 mod upload;
@@ -22,6 +23,7 @@ pub use remote_auth::{
     RemoteAuthSession, RemoteUserPreview, parse_user_payload, qr_login_url,
     remote_auth_gateway_url, remote_auth_origin,
 };
+pub use remote_auth_io::{complete_remote_auth, remote_auth_host, rustls_client_config};
 pub use route::{BucketKey, HttpMethod, RestRoute, discord_api_origin, rest_root, rest_url};
 pub use runtime::runtime_handle;
 pub use upload::{
