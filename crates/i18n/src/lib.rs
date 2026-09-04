@@ -23,11 +23,29 @@ pub enum MessageKey {
     EmptyChatBody,
     EmptyMembersTitle,
     EmptyMembersBody,
+    RiskNoticeTitle,
+    RiskNoticeBody,
+    RiskNoticeAccept,
+    LoginTitle,
+    LoginIdentifier,
+    LoginPassword,
+    LoginSubmit,
+    LoginBusy,
+    LoginErrorGeneric,
+    LoginInvalidAuth,
+    LoginNetworkError,
+    MfaTitle,
+    MfaCode,
+    MfaSubmit,
+    CaptchaTitle,
+    CaptchaBody,
+    CaptchaKey,
+    CaptchaSubmit,
 }
 
 impl MessageKey {
     #[cfg(test)]
-    const ALL: [Self; 16] = [
+    const ALL: [Self; 34] = [
         Self::ApplicationName,
         Self::AppearanceDark,
         Self::AppearanceLight,
@@ -44,6 +62,24 @@ impl MessageKey {
         Self::EmptyChatBody,
         Self::EmptyMembersTitle,
         Self::EmptyMembersBody,
+        Self::RiskNoticeTitle,
+        Self::RiskNoticeBody,
+        Self::RiskNoticeAccept,
+        Self::LoginTitle,
+        Self::LoginIdentifier,
+        Self::LoginPassword,
+        Self::LoginSubmit,
+        Self::LoginBusy,
+        Self::LoginErrorGeneric,
+        Self::LoginInvalidAuth,
+        Self::LoginNetworkError,
+        Self::MfaTitle,
+        Self::MfaCode,
+        Self::MfaSubmit,
+        Self::CaptchaTitle,
+        Self::CaptchaBody,
+        Self::CaptchaKey,
+        Self::CaptchaSubmit,
     ];
 }
 
@@ -72,6 +108,26 @@ fn turkish(key: MessageKey) -> &'static str {
         MessageKey::EmptyChatBody => "Bu kanal sessiz. Bir ileti yazıldığında burada görünür.",
         MessageKey::EmptyMembersTitle => "Üye yok",
         MessageKey::EmptyMembersBody => "Üyeler bir kanal açıldığında burada durur.",
+        MessageKey::RiskNoticeTitle => "Hesap riski",
+        MessageKey::RiskNoticeBody => {
+            "Üçüncü taraf istemciler Discord hizmet şartlarına aykırıdır. Devam etmek hesap riskini kabul etmektir."
+        }
+        MessageKey::RiskNoticeAccept => "Riski kabul ediyorum",
+        MessageKey::LoginTitle => "Giriş",
+        MessageKey::LoginIdentifier => "E-posta veya telefon",
+        MessageKey::LoginPassword => "Parola",
+        MessageKey::LoginSubmit => "Giriş yap",
+        MessageKey::LoginBusy => "Giriş yapılıyor",
+        MessageKey::LoginErrorGeneric => "Giriş başarısız oldu.",
+        MessageKey::LoginInvalidAuth => "Kimlik bilgileri geçersiz.",
+        MessageKey::LoginNetworkError => "Ağa ulaşılamadı.",
+        MessageKey::MfaTitle => "İki adımlı doğrulama",
+        MessageKey::MfaCode => "Doğrulama kodu",
+        MessageKey::MfaSubmit => "Doğrula",
+        MessageKey::CaptchaTitle => "Doğrulama gerekli",
+        MessageKey::CaptchaBody => "Discord bir captcha istedi. Çözüm anahtarını yapıştırın.",
+        MessageKey::CaptchaKey => "Captcha anahtarı",
+        MessageKey::CaptchaSubmit => "Yeniden dene",
     }
 }
 
@@ -95,6 +151,26 @@ fn english(key: MessageKey) -> &'static str {
         }
         MessageKey::EmptyMembersTitle => "No members",
         MessageKey::EmptyMembersBody => "Members appear here when a channel is open.",
+        MessageKey::RiskNoticeTitle => "Account risk",
+        MessageKey::RiskNoticeBody => {
+            "Third party clients are against Discord terms of service. Continuing accepts the account risk."
+        }
+        MessageKey::RiskNoticeAccept => "I accept the risk",
+        MessageKey::LoginTitle => "Sign in",
+        MessageKey::LoginIdentifier => "Email or phone",
+        MessageKey::LoginPassword => "Password",
+        MessageKey::LoginSubmit => "Sign in",
+        MessageKey::LoginBusy => "Signing in",
+        MessageKey::LoginErrorGeneric => "Sign in failed.",
+        MessageKey::LoginInvalidAuth => "Those credentials are not valid.",
+        MessageKey::LoginNetworkError => "The network could not be reached.",
+        MessageKey::MfaTitle => "Two-step verification",
+        MessageKey::MfaCode => "Verification code",
+        MessageKey::MfaSubmit => "Verify",
+        MessageKey::CaptchaTitle => "Verification required",
+        MessageKey::CaptchaBody => "Discord asked for a captcha. Paste the solution key.",
+        MessageKey::CaptchaKey => "Captcha key",
+        MessageKey::CaptchaSubmit => "Try again",
     }
 }
 
@@ -124,5 +200,14 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn risk_notice_mentions_terms() {
+        let turkish = translate(Locale::Turkish, MessageKey::RiskNoticeBody);
+        let english = translate(Locale::English, MessageKey::RiskNoticeBody);
+        assert!(turkish.contains("hizmet şart"));
+        assert!(english.to_ascii_lowercase().contains("terms of service"));
+        assert_ne!(turkish, english);
     }
 }

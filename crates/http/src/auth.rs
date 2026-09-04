@@ -29,7 +29,7 @@ impl std::fmt::Debug for Password {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LoginCredentials {
     pub login: String,
     pub password: Password,

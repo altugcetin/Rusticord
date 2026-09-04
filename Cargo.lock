@@ -6057,8 +6057,11 @@ name = "rusticord-ui"
 version = "0.1.0"
 dependencies = [
  "gpui-kit",
+ "rusticord-http",
  "rusticord-i18n",
  "rusticord-platform",
+ "rusticord-store",
+ "tokio",
 ]
 
 [[package]]

@@ -1,28 +1,94 @@
+use std::sync::Arc;
+
 use gpui_kit::component::button::{Button, ButtonVariants};
+use gpui_kit::component::input::InputState;
 use gpui_kit::component::{TitleBar, h_flex, v_flex};
 use gpui_kit::{
-    App, Bounds, Context, IntoElement, ParentElement, Render, Styled, Window, WindowBounds,
+    App, Bounds, Context, Entity, IntoElement, ParentElement, Render, Styled, Window, WindowBounds,
     WindowOptions, div, px, size,
 };
+use rusticord_http::{CaptchaChallenge, LoginCredentials, RestClient};
 use rusticord_i18n::{Locale, MessageKey, translate};
 use rusticord_platform::APPLICATION_IDENTIFIER;
+use rusticord_store::SettingsStore;
 
+use crate::login::{load_settings, make_input, restore_session};
 use crate::palette::{
     Appearance, AppearancePalette, CHANNEL_SIDEBAR_WIDTH, GUILD_RAIL_WIDTH, MEMBER_LIST_WIDTH,
 };
 use crate::theme::{apply_appearance, to_hsla};
 
+#[derive(Clone, Debug)]
+pub(crate) struct MfaPending {
+    pub ticket: String,
+    pub login_instance_id: Option<String>,
+    pub totp: bool,
+    pub sms: bool,
+    pub backup: bool,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum AuthPhase {
+    SignedOut,
+    Busy,
+    AwaitingMfa(MfaPending),
+    AwaitingCaptcha { resume_mfa: bool },
+    SignedIn,
+}
+
 pub struct Shell {
-    appearance: Appearance,
-    locale: Locale,
+    pub(crate) appearance: Appearance,
+    pub(crate) locale: Locale,
+    pub(crate) tos_accepted: bool,
+    pub(crate) phase: AuthPhase,
+    pub(crate) error: Option<MessageKey>,
+    pub(crate) login_input: Entity<InputState>,
+    pub(crate) password_input: Entity<InputState>,
+    pub(crate) mfa_input: Entity<InputState>,
+    pub(crate) captcha_input: Entity<InputState>,
+    pub(crate) client: Option<Arc<RestClient>>,
+    pub(crate) settings: Option<SettingsStore>,
+    pub(crate) pending_credentials: Option<LoginCredentials>,
+    pub(crate) pending_captcha: Option<CaptchaChallenge>,
+    pub(crate) pending_mfa_resume: Option<MfaPending>,
 }
 
 impl Shell {
-    pub fn new(cx: &mut Context<Self>) -> Self {
-        apply_appearance(Appearance::Dark, None, cx);
+    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let (tos_accepted, locale, appearance, settings) = load_settings();
+        apply_appearance(appearance, None, cx);
+        let client = RestClient::new().ok().map(Arc::new);
+        let login_input = make_input(
+            window,
+            cx,
+            translate(locale, MessageKey::LoginIdentifier),
+            false,
+        );
+        let password_input = make_input(
+            window,
+            cx,
+            translate(locale, MessageKey::LoginPassword),
+            true,
+        );
+        let mfa_input = make_input(window, cx, translate(locale, MessageKey::MfaCode), false);
+        let captcha_input =
+            make_input(window, cx, translate(locale, MessageKey::CaptchaKey), false);
+        let phase = restore_session(tos_accepted, &client);
         Self {
-            appearance: Appearance::Dark,
-            locale: Locale::default(),
+            appearance,
+            locale,
+            tos_accepted,
+            phase,
+            error: None,
+            login_input,
+            password_input,
+            mfa_input,
+            captcha_input,
+            client,
+            settings,
+            pending_credentials: None,
+            pending_captcha: None,
+            pending_mfa_resume: None,
         }
     }
 
@@ -32,6 +98,7 @@ impl Shell {
             Appearance::Light => Appearance::Dark,
         };
         apply_appearance(self.appearance, Some(window), cx);
+        self.persist_settings();
         cx.notify();
     }
 }
@@ -54,6 +121,7 @@ impl Render for Shell {
             Appearance::Dark => translate(locale, MessageKey::AppearanceLight),
             Appearance::Light => translate(locale, MessageKey::AppearanceDark),
         };
+        let signed_in = matches!(self.phase, AuthPhase::SignedIn);
 
         v_flex()
             .size_full()
@@ -78,17 +146,23 @@ impl Render for Shell {
                         ),
                 ),
             )
-            .child(
-                div()
-                    .flex()
-                    .flex_1()
-                    .min_h_0()
-                    .child(guild_rail(palette, locale))
-                    .child(channel_sidebar(palette, locale))
-                    .child(chat_pane(palette, locale))
-                    .child(member_list(palette, locale)),
-            )
+            .child(if signed_in {
+                signed_in_workspace(palette, locale).into_any_element()
+            } else {
+                self.render_signed_out(cx).into_any_element()
+            })
     }
+}
+
+fn signed_in_workspace(palette: AppearancePalette, locale: Locale) -> impl IntoElement {
+    div()
+        .flex()
+        .flex_1()
+        .min_h_0()
+        .child(guild_rail(palette, locale))
+        .child(channel_sidebar(palette, locale))
+        .child(chat_pane(palette, locale))
+        .child(member_list(palette, locale))
 }
 
 fn guild_rail(palette: AppearancePalette, locale: Locale) -> impl IntoElement {

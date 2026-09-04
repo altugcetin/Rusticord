@@ -1,3 +1,4 @@
+mod login;
 mod palette;
 mod shell;
 mod theme;

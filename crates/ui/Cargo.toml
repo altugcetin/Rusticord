@@ -12,5 +12,8 @@ workspace = true
 
 [dependencies]
 gpui-kit.workspace = true
+rusticord-http = { path = "../http", version = "0.1.0" }
 rusticord-i18n = { path = "../i18n", version = "0.1.0" }
 rusticord-platform = { path = "../platform", version = "0.1.0" }
+rusticord-store = { path = "../store", version = "0.1.0" }
+tokio.workspace = true

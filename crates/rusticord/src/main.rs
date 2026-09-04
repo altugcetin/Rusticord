@@ -11,7 +11,7 @@ fn main() {
             cx.spawn(async move |cx| {
                 if cx
                     .open_window(options, |window, cx| {
-                        let shell = cx.new(Shell::new);
+                        let shell = cx.new(|cx| Shell::new(window, cx));
                         cx.new(|cx| Root::new(shell, window, cx))
                     })
                     .is_err()
