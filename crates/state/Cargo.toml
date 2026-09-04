@@ -2,9 +2,13 @@
 name = "rusticord-state"
 version.workspace = true
 edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+rusticord-domain = { path= "../domain"}
 
 [lints]
 workspace = true

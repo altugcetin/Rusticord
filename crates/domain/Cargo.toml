@@ -2,9 +2,14 @@
 name = "rusticord-domain"
 version.workspace = true
 edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 publish.workspace = true
-
-[dependencies]
 
 [lints]
 workspace = true
+
+[dependencies]
+
+serde.workspace = true

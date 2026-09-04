@@ -2,9 +2,19 @@
 name = "rusticord-desktop"
 version.workspace = true
 edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 publish.workspace = true
-
-[dependencies]
 
 [lints]
 workspace = true
+
+[[bin]]
+name = "rusticord"
+path = "src/main.rs"
+
+[dependencies]
+gpui.workspace = true
+rusticord-ui = { path = "../../crates/ui" }
+
