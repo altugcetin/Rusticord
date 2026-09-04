@@ -9,3 +9,12 @@ publish.workspace = true
 
 [lints]
 workspace = true
+
+[dependencies]
+keyring.workspace = true
+postcard.workspace = true
+redb.workspace = true
+rusticord-platform = { path = "../platform", version = "0.1.0" }
+serde.workspace = true
+thiserror.workspace = true
+zeroize.workspace = true
